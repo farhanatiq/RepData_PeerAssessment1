@@ -1,20 +1,90 @@
----
-title: "Reproducible Research: Peer Assessment 1"
-output: 
-  html_document:
-    keep_md: true
----
 
+    Which 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps?
+
+# We find the position of the maximum mean
+max_pos <- which(mean_data$mean == max(mean_data$mean))
+
+# We lookup the value of interval at this position
+max_interval <- mean_data[max_pos, 1]
+
+The 5-minute interval that contains the maximum of steps, on average across all days, is 835.
+Inputing the missing values
+
+Note that there are a number of days/intervals where there are missing values (coded as NA). The presence of missing days may introduce bias into some calculations or summaries of the data.
+
+Calculate and report the total number of missing values in the dataset (i.e. the total number of rows with NA’s)
+
+# We use the trick that a TRUE boolean value is equivalent to 1 and a FALSE to 0.
+NA_count <- sum(is.na(activity$steps))
+
+The number of NA’s is 2304.
+
+    Devise a strategy for filling in all of the missing values in the dataset. The strategy does not need to be sophisticated. For example, you could use the mean/median for that day, or the mean for that 5-minute interval, etc.
+
+Note that there are a number of days/intervals where there are missing values (coded as NA). The presence of missing days may introduce bias into some calculations or summaries of the data.
+
+    Calculate and report the total number of missing values in the dataset (i.e. the total number of rows with NA’s)
+# Find the NA positions
+na_pos <- which(is.na(activity$steps))
+
+# Create a vector of means
+mean_vec <- rep(mean(activity$steps, na.rm=TRUE), times=length(na_pos))
+
+We use the strategy to remplace each NA value by the mean of the steps attribute.
+
+Create a new dataset that is equal to the original dataset but with the missing data filled in.
+
+# Replace the NAs by the means
+activity[na_pos, "steps"] <- mean_vec
 
 ## Loading and preprocessing the data
+In case it hasn't been done already, we unzip the archive. We then read the file into the variable data.
+
+if(!file.exists("a")) unzip("activity.zip")
+data <- read.csv("activity.csv", colClasses = c("numeric", "Date", "numeric"))
 
 
 
 ## What is mean total number of steps taken per day?
 
+Make a histogram of the total number of steps taken each day
+
+# Compute the total number of steps each day (NA values removed)
+sum_data <- aggregate(activity$steps, by=list(activity$date), FUN=sum, na.rm=TRUE)
+
+# Rename the attributes
+names(sum_data) <- c("date", "total")
+
+The histogram is given by the following lines of code:
+
+# Compute the histogram of the total number of steps each day
+hist(sum_data$total, 
+     breaks=seq(from=0, to=25000, by=2500),
+     col="blue", 
+     xlab="Total number of steps", 
+     ylim=c(0, 20), 
+     main="Histogram of the total number of steps taken each day\n(NA removed)")
+
+The mean and median are computed like
+
+mean(sum_data$total)
+median(sum_data$total)
+These formulas gives a mean and median of 9354 and 10395 respectively.
+
 
 
 ## What is the average daily activity pattern?
+
+Make a time series plot (i.e. type = "l") of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all days (y-axis)
+
+# Compute the means of steps accross all days for each interval
+mean_data <- aggregate(activity$steps, 
+                       by=list(activity$interval), 
+                       FUN=mean, 
+                       na.rm=TRUE)
+
+# Rename the attributes
+names(mean_data) <- c("interval", "mean")
 
 
 
